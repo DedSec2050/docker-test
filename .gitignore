@@ -1,0 +1,14 @@
+.env
+.venv
+pnpm-lock.yaml
+node_modules
+.DS_Store
+dist
+coverage
+*.log
+*.env
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+.vscode

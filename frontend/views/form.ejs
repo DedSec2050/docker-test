@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <!-- Adding Bootstrap for responsiveness and styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-primary mb-4">Submit Todo Item</h1>
+
+        <!-- Error Alert -->
+        <% if (error) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <%= error %>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            <% } %>
+
+                <form action="/submit" method="POST" class="mb-4">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="item_name">Todo Name</label>
+                            <input type="text" name="item_name" id="item_name" placeholder="Enter todo name" required
+                                class="form-control">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="item_description">Description</label>
+                            <textarea name="item_description" id="item_description" placeholder="Enter description"
+                                required class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Todo
+                    </button>
+                    <a href="/health" class="btn btn-info ml-2">
+                        <i class="fas fa-heartbeat"></i> Health Check
+                    </a>
+                </form>
+
+                <h2 class="text-success mb-3">
+                    Existing Todos
+                    <span class="badge badge-secondary">
+                        <%= todos.length %>
+                    </span>
+                </h2>
+
+                <% if (todos.length===0) { %>
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle"></i> No todos found. Add your first todo above!
+                    </div>
+                    <% } else { %>
+                        <ul class="list-group">
+                            <% todos.forEach((todo, index)=> { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">
+                                            <strong>
+                                                <%= todo.name %>
+                                            </strong>
+                                        </div>
+                                        <%= todo.description %>
+                                            <% if (todo.created_at) { %>
+                                                <small class="text-muted d-block">
+                                                    Created: <%= new Date(todo.created_at).toLocaleString() %>
+                                                </small>
+                                                <% } %>
+                                    </div>
+                                    <span class="badge badge-primary rounded-pill">#<%= index + 1 %></span>
+                                </li>
+                                <% }) %>
+                        </ul>
+                        <% } %>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
