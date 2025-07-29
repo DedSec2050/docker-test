@@ -1,0 +1,15 @@
+node_modules
+.git
+Dockerfile
+docker-compose.yml
+.env
+*.log
+*.db
+*.sqlite3
+*.swp
+*.swo
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.egg-info/

@@ -1,11 +1,12 @@
-version: "3.8"
+version: "3.9"
 
 services:
   backend:
     build: ./backend
+    hostname: todo-backend
     container_name: todo-backend
     ports:
-      - "5000:5000"
+      - "8000:8000"
     environment:
       - FLASK_ENV=development
     env_file:
@@ -20,6 +21,8 @@ services:
     container_name: todo-frontend
     ports:
       - "3000:3000"
+    environment:
+      - BACKEND_URL=http://todo-backend:8000
     depends_on:
       - backend
     networks:
