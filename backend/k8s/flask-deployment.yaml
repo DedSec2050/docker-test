@@ -17,7 +17,7 @@ spec:
         - name: flask
           image: marsalsoren/tute-dude-backend:latest
           ports:
-            - containerPort: 5000
+            - containerPort: 8000
 ---
 apiVersion: v1
 kind: Service
