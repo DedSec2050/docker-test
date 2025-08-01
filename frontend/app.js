@@ -10,7 +10,7 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // Backend URL - use environment variable or default to localhost for local development
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
+const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:64666/";
 
 // Home page with form
 app.get("/", async (req, res) => {
