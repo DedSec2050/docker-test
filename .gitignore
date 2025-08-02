@@ -12,3 +12,28 @@ coverage
 *.env.test.local
 *.env.production.local
 .vscode
+key.pem
+terraform.tfstate
+terraform.tfstate.backup
+.terraform
+.terraform.lock.hcl
+.idea
+*.iml
+*.swp
+*.swo   
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.egg-info/
+*.eggs
+*.venv/
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+# Ignore coverage reports
+coverage/
+
+# Ignore logs
+*.log

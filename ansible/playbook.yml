@@ -1,0 +1,85 @@
+- name: Provision Flask + Express with systemd
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Ensure required packages are installed
+      apt:
+        name: [git, python3, python3-pip, python3-venv, nodejs, npm]
+        update_cache: yes
+
+    - name: Clone the GitHub repository
+      git:
+        repo: https://github.com/DedSec2050/docker-test.git
+        dest: /home/ubuntu/docker-test
+        force: yes
+
+    # ---- Backend Setup ----
+    - name: Create Python virtual environment
+      command: python3 -m venv venv
+      args:
+        chdir: /home/ubuntu/docker-test/backend
+        creates: /home/ubuntu/docker-test/backend/venv
+
+    - name: Install Python requirements
+      pip:
+        requirements: /home/ubuntu/docker-test/backend/requirements.txt
+        virtualenv: /home/ubuntu/docker-test/backend/venv
+
+    # ---- Frontend Setup ----
+    - name: Install frontend dependencies
+      npm:
+        path: /home/ubuntu/docker-test/frontend
+
+    # ---- systemd service for backend ----
+    - name: Create systemd service for backend
+      copy:
+        dest: /etc/systemd/system/flask-backend.service
+        content: |
+          [Unit]
+          Description=Flask Backend Service
+          After=network.target
+
+          [Service]
+          User=ubuntu
+          WorkingDirectory=/home/ubuntu/docker-test/backend
+          ExecStart=/home/ubuntu/docker-test/backend/venv/bin/python3 app.py
+          Restart=always
+          Environment=FLASK_ENV=production
+
+          [Install]
+          WantedBy=multi-user.target
+
+    # ---- systemd service for frontend ----
+    - name: Create systemd service for frontend
+      copy:
+        dest: /etc/systemd/system/express-frontend.service
+        content: |
+          [Unit]
+          Description=Express Frontend Service
+          After=network.target
+
+          [Service]
+          User=ubuntu
+          WorkingDirectory=/home/ubuntu/docker-test/frontend
+          ExecStart=/usr/bin/node app.js
+          Restart=always
+          Environment=NODE_ENV=production
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd
+      command: systemctl daemon-reexec
+
+    - name: Enable and start backend service
+      systemd:
+        name: flask-backend.service
+        enabled: yes
+        state: restarted
+
+    - name: Enable and start frontend service
+      systemd:
+        name: express-frontend.service
+        enabled: yes
+        state: restarted
