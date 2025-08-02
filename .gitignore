@@ -37,3 +37,4 @@ coverage/
 
 # Ignore logs
 *.log
+*.ini

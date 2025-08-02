@@ -3,16 +3,27 @@
   become: yes
 
   tasks:
-    - name: Ensure required packages are installed
+    - name: Wait for apt lock to be released
+      shell: |
+        while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+          echo "Waiting for other apt processes to finish..."
+          sleep 5
+        done
+
+    - name: Ensure required packages are installed (with retries)
       apt:
         name: [git, python3, python3-pip, python3-venv, nodejs, npm]
         update_cache: yes
+      register: result
+      until: result is success
+      retries: 5
+      delay: 10
 
-    - name: Clone the GitHub repository
+    - name: Clone the GitHub repository and checkout specific branch
       git:
         repo: https://github.com/DedSec2050/docker-test.git
         dest: /home/ubuntu/docker-test
-        version: task1-as8
+        version: task1-as8 # Replace with your desired branch
         force: yes
 
     # ---- Backend Setup ----
