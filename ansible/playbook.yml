@@ -12,6 +12,7 @@
       git:
         repo: https://github.com/DedSec2050/docker-test.git
         dest: /home/ubuntu/docker-test
+        version: task1-as8
         force: yes
 
     # ---- Backend Setup ----
