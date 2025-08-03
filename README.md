@@ -1,18 +1,22 @@
 # 🚀 EC2 Provisioning with Terraform and Configuration with Ansible
 
-## 📦 Prerequisites
+## 🎯 Prerequisites
 
-- AWS account
-- AWS credentials configured (`~/.aws/credentials`)
-- `terraform` installed
-- `ansible` installed
-- SSH key pair (e.g., `my-key.pem`)
+Before you start, make sure you have:
+
+- **AWS Account**
+- **AWS Credentials** configured (`~/.aws/credentials`)
+- **Terraform** installed
+- **Ansible** installed
+- An **SSH key pair** (e.g., `my-key.pem`)
 
 ---
 
-## 1. 🔧 Terraform Setup
+## 🚀 Terraform Setup
 
-### 📁 Folder Structure
+### 📁 Project Folder Structure
+
+Structure your project as shown below:
 
 ```bash
 project/
@@ -25,4 +29,14 @@ project/
 │   ├── playbook.yml
 │   ├── flask-backend.service
 │   └── express-frontend.service
+```
+
+---
+
+## 🔄 Running the Playbook
+
+After generating the `inventory.ini` file using `./generate_in.sh`, execute the playbook with:
+
+```bash
+ansible-playbook -i inventory.ini playbook.yml
 ```
