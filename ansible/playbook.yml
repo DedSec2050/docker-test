@@ -3,21 +3,44 @@
   become: yes
 
   tasks:
-    - name: Wait for apt lock to be released
+    - name: Wait until apt lock is released
       shell: |
-        while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
-          echo "Waiting for other apt processes to finish..."
-          sleep 5
+        while sudo lsof /var/lib/dpkg/lock-frontend; do
+        echo "Waiting for apt lock to be released..."
+        sleep 5
         done
-
-    - name: Ensure required packages are installed (with retries)
-      apt:
-        name: [git, python3, python3-pip, python3-venv, nodejs, npm]
-        update_cache: yes
-      register: result
-      until: result is success
-      retries: 5
+      retries: 12
       delay: 10
+      register: apt_lock_check
+      changed_when: false
+
+    - name: Wait for apt lock to be released before installing packages
+      shell: |
+        while sudo lsof /var/lib/dpkg/lock-frontend; do
+          echo "Waiting for apt lock to be released for {{ item }}..."
+          sleep 3
+        done
+      with_items:
+        - git
+        - python3
+        - python3-pip
+        - python3-venv
+        - nodejs
+        - npm
+      changed_when: false
+
+    - name: Install packages if not present
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      with_items:
+        - git
+        - python3
+        - python3-pip
+        - python3-venv
+        - nodejs
+        - npm
 
     - name: Clone the GitHub repository and checkout specific branch
       git:
@@ -25,6 +48,14 @@
         dest: /home/ubuntu/docker-test
         version: task1-as8 # Replace with your desired branch
         force: yes
+
+    - name: Copy .env file to backend directory
+      copy:
+        src: .env # Local file (relative to your playbook or inventory path)
+        dest: /home/ubuntu/docker-test/backend/.env
+        owner: ubuntu
+        group: ubuntu
+        mode: "0600"
 
     # ---- Backend Setup ----
     - name: Create Python virtual environment
@@ -82,7 +113,7 @@
           WantedBy=multi-user.target
 
     - name: Reload systemd
-      command: systemctl daemon-reexec
+      command: systemctl daemon-reload
 
     - name: Enable and start backend service
       systemd:
@@ -95,3 +126,6 @@
         name: express-frontend.service
         enabled: yes
         state: restarted
+
+    - name: Reload systemd daemon
+      command: systemctl daemon-reload
