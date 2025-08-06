@@ -1,0 +1,64 @@
+- name: Provision Express Frontend with systemd
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Wait until apt lock is released
+      shell: |
+        while sudo lsof /var/lib/dpkg/lock-frontend; do
+        echo "Waiting for apt lock to be released..."
+        sleep 5
+        done
+      retries: 12
+      delay: 10
+      register: apt_lock_check
+      changed_when: false
+
+    - name: Install frontend-related packages
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      with_items:
+        - git
+        - nodejs
+        - npm
+
+    - name: Clone the GitHub repository and checkout specific branch
+      git:
+        repo: https://github.com/DedSec2050/docker-test.git
+        dest: /home/ubuntu/docker-test
+        version: task1-as8
+        force: yes
+
+    - name: Install frontend dependencies
+      npm:
+        path: /home/ubuntu/docker-test/frontend
+
+    - name: Create systemd service for frontend
+      copy:
+        dest: /etc/systemd/system/express-frontend.service
+        content: |
+          [Unit]
+          Description=Express Frontend Service
+          After=network.target
+
+          [Service]
+          User=ubuntu
+          WorkingDirectory=/home/ubuntu/docker-test/frontend
+          ExecStart=/usr/bin/node app.js
+          ExecStop=/bin/kill -s TERM $MAINPID
+          Restart=always
+          Environment=NODE_ENV=production
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd
+      command: systemctl daemon-reload
+
+    - name: Enable and start frontend service
+      systemd:
+        name: express-frontend.service
+        enabled: yes
+        state: restarted

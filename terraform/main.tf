@@ -35,7 +35,11 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
+# -----------------------
+# Two EC2 Instances
+# -----------------------
 resource "aws_instance" "app_instance" {
+  count                  = 2
   ami                    = var.app_ami
   instance_type          = var.instance_type
   key_name               = var.key_name
@@ -43,6 +47,6 @@ resource "aws_instance" "app_instance" {
   user_data              = file("${path.module}/user_data.sh")
 
   tags = {
-    Name = "Flask-Express-Server"
+    Name = "Flask-Express-Server-${count.index + 1}"
   }
 }

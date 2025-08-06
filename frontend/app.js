@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -9,10 +11,8 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// Backend URL - use environment variable or default to localhost for local development
 const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:8000/";
 
-// Home page with form
 app.get("/", async (req, res) => {
   try {
     console.log(`Fetching todos from: ${BACKEND_URL}/api`);
@@ -29,7 +29,6 @@ app.get("/", async (req, res) => {
   }
 });
 
-// Form POST handler - submits to Flask backend
 app.post("/submit", async (req, res) => {
   try {
     console.log("Submitting todo:", req.body);

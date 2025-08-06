@@ -1,0 +1,89 @@
+- name: Provision Flask Backend with systemd
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Wait until apt lock is released
+      shell: |
+        while sudo lsof /var/lib/dpkg/lock-frontend; do
+        echo "Waiting for apt lock to be released..."
+        sleep 5
+        done
+      retries: 12
+      delay: 10
+      register: apt_lock_check
+      changed_when: false
+
+    - name: Install backend-related packages
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      with_items:
+        - git
+        - python3
+        - python3-pip
+        - python3-venv
+
+    - name: Clone the GitHub repository and checkout specific branch
+      git:
+        repo: https://github.com/DedSec2050/docker-test.git
+        dest: /home/ubuntu/docker-test
+        version: task1-as8
+        force: yes
+
+    - name: Copy .env file to backend directory
+      copy:
+        src: .env
+        dest: /home/ubuntu/docker-test/backend/.env
+        owner: ubuntu
+        group: ubuntu
+        mode: "0600"
+
+    - name: Create Python virtual environment
+      command: python3 -m venv venv
+      args:
+        chdir: /home/ubuntu/docker-test/backend
+        creates: /home/ubuntu/docker-test/backend/venv
+
+    - name: Install Python requirements
+      pip:
+        requirements: /home/ubuntu/docker-test/backend/requirements.txt
+        virtualenv: /home/ubuntu/docker-test/backend/venv
+
+    - name: Create systemd service for backend
+      copy:
+        dest: /etc/systemd/system/flask-backend.service
+        content: |
+          [Unit]
+          Description=Flask Backend Service
+          After=network.target
+
+          [Service]
+          User=ubuntu
+          WorkingDirectory=/home/ubuntu/docker-test/backend
+          ExecStart=/home/ubuntu/docker-test/backend/venv/bin/python3 app.py
+          ExecStop=/bin/kill -s TERM $MAINPID
+          Restart=always
+          Environment=FLASK_ENV=production
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Kill any process using port 8000
+      shell: |
+        pid=$(sudo lsof -t -i:8000)
+        if [ -n "$pid" ]; then
+          echo "Killing process $pid using port 8000"
+          sudo kill -9 $pid
+        fi
+      ignore_errors: true
+
+    - name: Reload systemd
+      command: systemctl daemon-reload
+
+    - name: Enable and start backend service
+      systemd:
+        name: flask-backend.service
+        enabled: yes
+        state: restarted
