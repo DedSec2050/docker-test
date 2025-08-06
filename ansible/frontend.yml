@@ -28,7 +28,7 @@
       git:
         repo: https://github.com/DedSec2050/docker-test.git
         dest: /home/ubuntu/docker-test
-        version: task1-as8
+        version: task2-as8
         force: yes
 
     - name: Install frontend dependencies

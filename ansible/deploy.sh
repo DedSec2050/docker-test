@@ -28,6 +28,14 @@ cat inventory_backend.ini
 echo -e "\n🚀 Running backend Ansible playbook..."
 ansible-playbook -i inventory_backend.ini backend.yml
 
+mkdir -p frontend  # Ensure folder exists
+cat > frontend/.env <<EOF
+BACKEND_URL=http://$backend_ip:8000
+EOF
+
+echo -e "\n✅ Generated frontend/.env with backend URL:"
+cat frontend/.env
+
 # Deploy Frontend
 read -p "Enter the public IP address of your FRONTEND EC2 instance: " frontend_ip
 
