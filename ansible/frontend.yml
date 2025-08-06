@@ -35,6 +35,14 @@
       npm:
         path: /home/ubuntu/docker-test/frontend
 
+    - name: Copy .env file to frontend directory
+      copy:
+        src: frontend/.env
+        dest: /home/ubuntu/docker-test/frontend/.env
+        owner: ubuntu
+        group: ubuntu
+        mode: "0600"
+
     - name: Create systemd service for frontend
       copy:
         dest: /etc/systemd/system/express-frontend.service

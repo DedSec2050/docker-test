@@ -34,7 +34,7 @@
 
     - name: Copy .env file to backend directory
       copy:
-        src: .env
+        src: backend/.env
         dest: /home/ubuntu/docker-test/backend/.env
         owner: ubuntu
         group: ubuntu
