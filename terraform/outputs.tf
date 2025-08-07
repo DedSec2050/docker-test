@@ -1,4 +1,3 @@
-output "instance_public_ips" {
-  description = "Public IPs of the two EC2 instances"
-  value       = aws_instance.app_instance[*].public_ip
+output "alb_dns_name" {
+  value = aws_lb.app_alb.dns_name
 }

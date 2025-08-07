@@ -6,6 +6,8 @@ const bodyParser = require("body-parser");
 const axios = require("axios");
 
 const app = express();
+const router = express.Router();
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -13,7 +15,9 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:8000/";
 
-app.get("/", async (req, res) => {
+// Routes under /express
+
+router.get("/", async (req, res) => {
   try {
     console.log(`Fetching todos from: ${BACKEND_URL}/api`);
     const response = await axios.get(`${BACKEND_URL}/api`);
@@ -29,7 +33,7 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.post("/submit", async (req, res) => {
+router.post("/submit", async (req, res) => {
   try {
     console.log("Submitting todo:", req.body);
     console.log(`Posting to: ${BACKEND_URL}/submittodoitem`);
@@ -45,7 +49,7 @@ app.post("/submit", async (req, res) => {
     );
 
     console.log("Backend response:", response.data);
-    res.redirect("/");
+    res.redirect("/express");
   } catch (error) {
     console.error("Error submitting todo:", error.message);
     if (error.response) {
@@ -57,8 +61,8 @@ app.post("/submit", async (req, res) => {
   }
 });
 
-// Health check endpoint
-app.get("/health", async (req, res) => {
+// Health check under /express
+router.get("/health", async (req, res) => {
   try {
     const response = await axios.get(`${BACKEND_URL}/health`);
     res.render("health", {
@@ -74,8 +78,7 @@ app.get("/health", async (req, res) => {
   }
 });
 
-// API endpoint for AJAX health check
-app.get("/api/health", async (req, res) => {
+router.get("/api/health", async (req, res) => {
   try {
     const response = await axios.get(`${BACKEND_URL}/health`);
     res.json({
@@ -91,9 +94,13 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
+// Mount the router at /express
+app.use("/express", router);
+
+// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Frontend running on port ${PORT}`);
   console.log(`Backend URL configured as: ${BACKEND_URL}`);
-  console.log(`🌐 Access the app at: http://localhost:${PORT}`);
+  console.log(`🌐 Access the app at: http://localhost:${PORT}/express`);
 });

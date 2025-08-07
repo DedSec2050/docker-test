@@ -201,7 +201,7 @@ def health_check():
 # Create the Flask app and register the blueprint
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this-in-production')
-app.register_blueprint(api)
+app.register_blueprint(api, url_prefix="/flask")
 
 # Add CORS support for frontend communication
 from flask_cors import CORS
