@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_security_group" "web_sg" {
-  name        = "flask-express-sg"
+  name        = "flask-express-sg-combined"
   description = "Allow 22, 3000, 8000"
 
   ingress {

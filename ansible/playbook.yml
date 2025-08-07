@@ -87,6 +87,7 @@
           User=ubuntu
           WorkingDirectory=/home/ubuntu/docker-test/backend
           ExecStart=/home/ubuntu/docker-test/backend/venv/bin/python3 app.py
+          ExecStop=/home/ubuntu/docker-test/backend/venv/bin/python3 app.py stop
           Restart=always
           Environment=FLASK_ENV=production
 
@@ -106,6 +107,7 @@
           User=ubuntu
           WorkingDirectory=/home/ubuntu/docker-test/frontend
           ExecStart=/usr/bin/node app.js
+          ExecStop=/usr/bin/node app.js stop
           Restart=always
           Environment=NODE_ENV=production
 
