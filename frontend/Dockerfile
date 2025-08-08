@@ -11,7 +11,8 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies using pnpm
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
+
 
 # Copy the rest of the application's code
 COPY . .
@@ -20,4 +21,4 @@ COPY . .
 EXPOSE 3000
 
 # Command to run your app
-CMD ["node", "app.js"]
+CMD ["pnpm", "run", "dev"]
