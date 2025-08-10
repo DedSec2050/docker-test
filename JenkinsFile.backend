@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_NET = 'docker-net'
+        // These come from Jenkins Global Properties
+        // MONGO_URI, SECRET_KEY, FLASK_ENV
+    }
+
+    stages {
+        stage('Clean Old Backend Container & Image') {
+            steps {
+                sh '''
+                    docker stop jenkins-backend-container || true
+                    docker rm jenkins-backend-container || true
+                    docker rmi jenkins-backend || true
+                '''
+            }
+        }
+
+        stage('Create Network If Missing') {
+            steps {
+                sh '''
+                    docker network inspect $DOCKER_NET >/dev/null 2>&1 || docker network create $DOCKER_NET
+                '''
+            }
+        }
+
+        stage('Build Backend') {
+            steps {
+                sh 'docker build -t jenkins-backend .'
+            }
+        }
+
+        stage('Run Backend') {
+            steps {
+                sh '''
+                    docker run -d \
+                      --name jenkins-backend-container \
+                      --network $DOCKER_NET \
+                      -p 8000:8000 \
+                      -e MONGO_URI="$MONGO_URI" \
+                      -e SECRET_KEY="$SECRET_KEY" \
+                      -e FLASK_ENV="$FLASK_ENV" \
+                      jenkins-backend
+                '''
+            }
+        }
+    }
+}

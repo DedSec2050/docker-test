@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_NET = 'docker-net'
+        // This comes from Jenkins Global Properties
+        // BACKEND_URL
+    }
+
+    stages {
+        stage('Clean Old Frontend Container & Image') {
+            steps {
+                sh '''
+                    docker stop jenkins-frontend-container || true
+                    docker rm jenkins-frontend-container || true
+                    docker rmi jenkins-frontend || true
+                '''
+            }
+        }
+
+        stage('Create Network If Missing') {
+            steps {
+                sh '''
+                    docker network inspect $DOCKER_NET >/dev/null 2>&1 || docker network create $DOCKER_NET
+                '''
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                sh 'docker build -t jenkins-frontend .'
+            }
+        }
+
+        stage('Run Frontend') {
+            steps {
+                sh '''
+                    docker run -d \
+                      --name jenkins-frontend-container \
+                      --network $DOCKER_NET \
+                      -p 3000:3000 \
+                      -e BACKEND_URL="$BACKEND_URL" \
+                      jenkins-frontend npm run dev
+                '''
+            }
+        }
+    }
+}
