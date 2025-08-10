@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Environment variables
         MONGO_URI = "${MONGO_URI}"
         SECRET_KEY = "${SECRET_KEY}"
         FLASK_ENV = "${FLASK_ENV}"
