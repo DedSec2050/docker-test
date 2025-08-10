@@ -3,8 +3,7 @@ pipeline {
 
     environment {
         DOCKER_NET = 'docker-net'
-        // These come from Jenkins Global Properties
-        // MONGO_URI, SECRET_KEY, FLASK_ENV
+        
     }
 
     stages {
