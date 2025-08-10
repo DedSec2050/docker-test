@@ -1,0 +1,86 @@
+pipeline {
+    agent any
+
+    environment {
+        // Environment variables
+        MONGO_URI = "${MONGO_URI}"
+        SECRET_KEY = "${SECRET_KEY}"
+        FLASK_ENV = "${FLASK_ENV}"
+        BACKEND_URL = "${BACKEND_URL}"
+        DOCKER_NET = "${DOCKER_NET}"
+    }
+
+    stages {
+        stage('Cleanup Backend') {
+            steps {
+                sh '''
+                    docker stop jenkins-backend-container || true
+                    docker rm jenkins-backend-container || true
+                    docker rmi jenkins-backend || true
+                '''
+            }
+        }
+
+        stage('Cleanup Frontend') {
+            steps {
+                sh '''
+                    docker stop jenkins-frontend-container || true
+                    docker rm jenkins-frontend-container || true
+                    docker rmi jenkins-frontend || true
+                '''
+            }
+        }
+
+        stage('Create Docker Network') {
+            steps {
+                sh '''
+                    docker network inspect $DOCKER_NET >/dev/null 2>&1 || docker network create $DOCKER_NET
+                '''
+            }
+        }
+
+        stage('Build Backend Image') {
+            steps {
+                dir('backend') {
+                    sh 'docker build -t jenkins-backend .'
+                }
+            }
+        }
+
+        stage('Build Frontend Image') {
+            steps {
+                dir('frontend') {
+                    sh 'docker build -t jenkins-frontend .'
+                }
+            }
+        }
+
+        stage('Run Backend Container') {
+            steps {
+                sh '''
+                    docker run -d \
+                        --name jenkins-backend-container \
+                        --network $DOCKER_NET \
+                        -p 8000:8000 \
+                        -e MONGO_URI="$MONGO_URI" \
+                        -e SECRET_KEY="$SECRET_KEY" \
+                        -e FLASK_ENV="$FLASK_ENV" \
+                        jenkins-backend
+                '''
+            }
+        }
+
+        stage('Run Frontend Container') {
+            steps {
+                sh '''
+                    docker run -d \
+                        --name jenkins-frontend-container \
+                        --network $DOCKER_NET \
+                        -p 3000:3000 \
+                        -e BACKEND_URL="$BACKEND_URL" \
+                        jenkins-frontend npm run dev
+                '''
+            }
+        }
+    }
+}
